@@ -117,10 +117,10 @@ dist
 .idea
 
 # snapcraft
-snap/parts
-snap/prime
-snap/snap
-snap/stage
+parts
+prime
+snap
+stage
 
 # data
-/data
+fdrsrc-daemon/data

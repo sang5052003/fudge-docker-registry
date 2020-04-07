@@ -1,0 +1,41 @@
+name: fdrsrv
+version-script: cat ${SNAPCRAFT_STAGE}/version
+version: "daily"
+summary: fudge docker registry server
+description: |
+  $ sudo systemctl enable snap.fdrsrv.daemon.service
+  $ sudo systemctl start snap.fdrsrv.daemon.service
+base: core18
+
+apps:
+  daemon:
+    command: wrappers/run-daemon-with-env
+    daemon: simple
+
+parts:
+  build:
+    plugin: nil
+    source: ./
+    build-packages:
+      - curl
+    stage-packages:
+      - sed
+    override-build: |
+      export APP_VERSION=$(git describe HEAD)
+      export APP_NAME=$SNAPCRAFT_PROJECT_NAME
+      echo $APP_VERSION > ${SNAPCRAFT_STAGE}/version
+      echo "BUILD VERSION = $APP_VERSION"
+      export NVM_DIR=${SNAPCRAFT_STAGE}/nvm
+      export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node
+      mkdir -p ${NVM_DIR}
+      mkdir -p ${SNAPCRAFT_PART_INSTALL}/app
+      curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+      . $NVM_DIR/nvm.sh
+      nvm install 12.16.1
+      cp -rf $NVM_DIR/versions/node/v12.16.1/* ${SNAPCRAFT_PART_INSTALL}/
+      cp -rf fdrsrv-resources/wrappers ${SNAPCRAFT_PART_INSTALL}/wrappers
+      cp -rf fdrsrv-resources/default-args ${SNAPCRAFT_PART_INSTALL}/default-args
+      chmod +x ${SNAPCRAFT_PART_INSTALL}/wrappers/*
+      cd ./fdrsrv-daemon
+      npm install
+      BUNDLE_JS_DIR=${SNAPCRAFT_PART_INSTALL}/app npm run build

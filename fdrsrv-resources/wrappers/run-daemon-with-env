@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -ex
+
+export PATH="$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH"
+app=daemon
+
+export APP_EXEC_DIR=$SNAP/app
+
+declare -a args="($(cat $SNAP_DATA/args/$app))"
+if [ -f ${SNAP_DATA}/args/${app}-env ]; then
+  set -a
+  . "${SNAP_DATA}/args/${app}-env"
+  set +a
+fi
+
+exec "$SNAP/bin/node" "$SNAP/app/bundle.js" "${args[@]}"
