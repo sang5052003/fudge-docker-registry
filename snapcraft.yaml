@@ -25,6 +25,10 @@ parts:
     build-packages:
       - git
       - curl
+      - python
+      - gcc
+      - g++
+      - make
     stage-packages:
       - sed
     override-pull: |
