@@ -1,15 +1,75 @@
 # fudge-docker-registry
 
+[![Snap Status](https://build.snapcraft.io/badge/jc-lab/fudge-docker-registry.svg)](https://build.snapcraft.io/user/jc-lab/fudge-docker-registry)
+
+fudge-docker-registry allows you to use these images offline (private network) without modifying the deployment/statefulset image.
+
+
+
 ## Snap Install
 
+#### 1. install package
+
 ```bash
-$ sudo snap install fdrsrv
+$ sudo snap install --edge fdrsrv
 # MODIFY /var/snap/fdrsrv/current/args/daemon-env
 $ sudo systemctl enable snap.fdrsrv.daemon.service
 $ sudo systemctl start snap.fdrsrv.daemon.service
 ```
 
+#### 2. modify containerd configuration
 
+Under /var/snap/microk8s/current/args, there are the following parts in containerd-template.toml and containerd.toml files.
+```toml
+...
+      [plugins.cri.registry.mirrors]
+        [plugins.cri.registry.mirrors."docker.io"]
+          endpoint = ["https://registry-1.docker.io"]
+...
+```
+Change this part as shown below. (Assuming the fdrsrv server's sub domain is http://sub.fdrsrv.local:33000)
+```toml
+...
+      [plugins.cri.registry.mirrors]
+        [plugins.cri.registry.mirrors."docker.io"]
+          endpoint = ["http://docker.io.sub.fdrsrv.local:33000"]
+        [plugins.cri.registry.mirrors."quay.io"]
+          endpoint = ["http://quay.io.sub.fdrsrv.local:33000"]
+        [plugins.cri.registry.mirrors."k8s.gcr.io"]
+          endpoint = ["http://k8s.gcr.io.sub.fdrsrv.local:33000"]
+...
+```
+It must be modified on all nodes of the cluster.
+
+Then restart the containerd service.
+```bash
+$ sudo systemctl restart containerd.service
+# If microk8s,
+$ sudo systemctl restart snap.microk8s.daemon-containerd.service
+```
+
+
+Also, add to /etc/hosts.
+```text
+10.0.0.10 fdrsrv.local
+10.0.0.10 docker.io.sub.fdrsrv.local
+10.0.0.10 quay.io.sub.fdrsrv.local
+10.0.0.10 k8s.gcr.io.sub.fdrsrv.local
+```
+
+And then, upload the necessary images to the fudge-docker-registry server.
+
+```bash
+$ sudo ctr namespace create temp
+$ sudo ctr -n temp image pull k8s.gcr.io/pause:3.1 --all-platforms
+$ sudo ctr -n temp image pull docker.io/library/busybox:latest --all-platforms
+
+$ sudo ctr -n temp image push --plain-http k8s.gcr.io.sub.fdrsrv.local:33000/pause:3.1 k8s.gcr.io/pause:3.1
+
+$ sudo ctr -n temp image push --plain-http docker.io.sub.fdrsrv.local:33000/library/busybox:latest docker.io/library/busybox:latest
+# Above is as below.
+$ sudo ctr -n temp image push --plain-http fdrsrv.local:33000/docker.io/library/busybox:latest docker.io/library/busybox:latest
+````
 
 ## Environment
 
