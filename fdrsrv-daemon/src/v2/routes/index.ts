@@ -7,13 +7,13 @@ const router = express.Router();
 
 router.use(expressJwt({
   secret: appEnv.APP_JWT_SECRET,
-  credentialsRequired: false,
+  credentialsRequired: false
 }));
 router.use((req: express.Request, res: express.Response, next: any) => {
   if (!appEnv.APP_NEED_LOGIN && (!(req as any).user)) {
     (req as any).user = {
       jti: '*anonymous',
-      user_id: 'anonymous',
+      user_id: 'anonymous'
     };
   }
   next();

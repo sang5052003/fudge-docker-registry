@@ -8,7 +8,7 @@ export default class UnauthorizedError extends HttpError {
     super({
       name: 'UnauthorizedError',
       message: 'unauthorized',
-      status: 401,
+      status: 401
     });
 
     Object.defineProperty(this, C_HTTP_ERROR_CHECKER, { value: C_HTTP_ERROR_CHECK_VALUE });

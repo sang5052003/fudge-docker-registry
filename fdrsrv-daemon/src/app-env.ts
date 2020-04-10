@@ -76,7 +76,7 @@ function login(username: string, password: string): Promise<boolean> {
     if (envUsername && envPassword) {
       return Promise.resolve(
         (username === envUsername)
-          && (password === envPassword),
+          && (password === envPassword)
       );
     }
   }
@@ -123,7 +123,7 @@ function getBlobsDir() {
 }
 
 function getBlobFilePath(digest: string) {
-  const [ algo, hash ] = digest.split(':', 2);
+  const [algo, hash] = digest.split(':', 2);
   return path.join(getBlobsDir(), algo, hash);
 }
 

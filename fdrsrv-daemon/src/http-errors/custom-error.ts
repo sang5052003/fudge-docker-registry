@@ -14,7 +14,7 @@ function toHttpErrorParam(opts: IOpts | ApiErrorInfo): IOpts {
       name: opts.code,
       message: opts.message,
       status: 404,
-      details: opts.description,
+      details: opts.description
     };
   }
   return opts;

@@ -10,15 +10,15 @@ export default function (req: express.Request, res: express.Response, next: any)
   store.getBlob({
     registry, name, digest
   })
-      .then(({ file, stats }) => {
-        const digestAlgorithm = path.basename(path.dirname(file));
-        const digestHash = path.basename(file);
-        const digest = `${digestAlgorithm}:${digestHash}`;
-        res
-            .status(200)
-            .header('Content-Length', stats.size.toString())
-            .header('Docker-Content-Digest', digest)
-            .send();
-      })
-      .catch((e) => next(e));
+    .then(({ file, stats }) => {
+      const digestAlgorithm = path.basename(path.dirname(file));
+      const digestHash = path.basename(file);
+      const digestText = `${digestAlgorithm}:${digestHash}`;
+      res
+        .status(200)
+        .header('Content-Length', stats.size.toString())
+        .header('Docker-Content-Digest', digestText)
+        .send();
+    })
+    .catch((e) => next(e));
 }

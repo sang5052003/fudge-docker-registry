@@ -37,6 +37,7 @@ module.exports = {
     'max-classes-per-file': 'off',
     'no-underscore-dangle': 'off',
     'no-async-promise-executor': 'off',
-    'no-console': 'off'
+    'no-console': 'off',
+    'comma-dangle': ['error', 'never']
   }
 };

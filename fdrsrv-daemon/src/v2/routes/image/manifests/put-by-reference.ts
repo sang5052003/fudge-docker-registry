@@ -17,7 +17,7 @@ function getDigestFromReference(input: string): string[] | undefined {
   if (!matchers) { return undefined; }
   return [
     matchers[1],
-    matchers[2],
+    matchers[2]
   ];
 }
 

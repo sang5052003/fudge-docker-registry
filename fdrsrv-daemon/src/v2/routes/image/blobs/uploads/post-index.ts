@@ -28,7 +28,7 @@ export default function (req: express.Request, res: express.Response, next: any)
       (err) => {
         if (err) reject(err);
         else resolve();
-      },
+      }
     );
   })).then(() => {
     res
@@ -41,7 +41,7 @@ export default function (req: express.Request, res: express.Response, next: any)
     next(new CustomError({
       name: 'ServerError',
       message: 'DB Error',
-      status: 500,
+      status: 500
     }));
   });
 }

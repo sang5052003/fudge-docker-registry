@@ -21,21 +21,21 @@ export default function (req: express.Request, res: express.Response, next: any)
       (err: Error) => {
         if (err) reject(err);
         else resolve(tagList);
-      },
+      }
     );
   })).then((tagList) => {
     res
       .status(200)
       .send({
         name: simpleName,
-        tags: tagList,
+        tags: tagList
       });
   }).catch((err) => {
     console.error(err);
     next(new CustomError({
       name: 'ServerError',
       message: 'DB Error',
-      status: 500,
+      status: 500
     }));
   });
 }

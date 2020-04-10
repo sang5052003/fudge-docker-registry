@@ -20,12 +20,12 @@ export function checkAuth(req: express.Request): ICheckAuthResult {
   if (!user) {
     return {
       error: new UnauthorizedError(),
-      user: null,
+      user: null
     };
   }
 
   return {
     error: null,
-    user,
+    user
   };
 }

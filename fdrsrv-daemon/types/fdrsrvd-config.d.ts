@@ -1,4 +1,5 @@
-export declare type LoginFunction = (username: string, password: string) => Promise<boolean> | boolean;
+export declare type LoginFunction =
+    (username: string, password: string) => Promise<boolean> | boolean;
 
 export declare interface IExternalRegistryInfo {
   endpoint?: string;

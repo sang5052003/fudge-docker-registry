@@ -30,15 +30,15 @@ function issueToken(opts: {
     nbf: (Math.floor(issuedAt.getTime() / 1000) - 60),
     jti,
     scope: opts.scope,
-    user_id: opts.id,
+    user_id: opts.id
   }, appEnv.APP_JWT_SECRET, {
-    expiresIn: '3000000s',
+    expiresIn: '3000000s'
   });
   return {
     token,
     access_token: token,
     expires_in: 300,
-    issued_at: issuedAt.toISOString(),
+    issued_at: issuedAt.toISOString()
   };
 }
 
@@ -50,8 +50,8 @@ function sendUnauthorized(req: express.Request, res: express.Response, message?:
       {
         code: 'UNAUTHORIZED',
         message: 'authentication required',
-        details: message || null,
-      },
+        details: message || null
+      }
     ]);
 }
 
@@ -63,7 +63,7 @@ export default (req: express.Request, res: express.Response) => {
       .send([{
         code: 'BadReqeust',
         message: 'Wrong arguments',
-        details: errors.array(),
+        details: errors.array()
       }]);
     return;
   }
@@ -75,7 +75,7 @@ export default (req: express.Request, res: express.Response) => {
       const token = issueToken({
         id: '',
         req,
-        scope: scope ? [scope.join(':')] : [],
+        scope: scope ? [scope.join(':')] : []
       });
       res
         .status(200)
@@ -94,7 +94,7 @@ export default (req: express.Request, res: express.Response) => {
         const token = issueToken({
           id: idpw[0],
           req,
-          scope: [scope.join(':')],
+          scope: [scope.join(':')]
         });
         res
           .status(200)

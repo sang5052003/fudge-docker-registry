@@ -37,7 +37,7 @@ db.serialize(() => {
         console.error(err);
       }
       console.log('DB CONNECTED!');
-    },
+    }
   );
 });
 
@@ -56,7 +56,7 @@ interface IDbContext {
 
 const dbContext: IDbContext = {
   lock: 0,
-  workQueue: [],
+  workQueue: []
 };
 
 function removeReduce<T>(arr: T[], reducer: (chain: T, item: T) => T, initial: T): T {
@@ -89,7 +89,7 @@ function dbIsolateRun<T>(fn: DbRunFunction<T>): Promise<T> {
       dbContext.workQueue.push({
         fn,
         resolve,
-        reject,
+        reject
       });
       return;
     }
@@ -106,7 +106,7 @@ function dbIsolateRun<T>(fn: DbRunFunction<T>): Promise<T> {
 }
 
 export {
-  dbIsolateRun,
+  dbIsolateRun
 };
 
 export default null;

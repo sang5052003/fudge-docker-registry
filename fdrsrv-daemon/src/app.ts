@@ -32,7 +32,7 @@ app.use(bodyParser.json({
   },
   verify(req: any, res: any, buf: Buffer): void {
     (req as any).rawBody = buf;
-  },
+  }
 }));
 app.use(bodyParser.raw());
 // app.use(express.json());
@@ -52,7 +52,7 @@ router.use((err: any, req: express.Request, res: express.Response) => {
       res.send(err.response);
     } else if (err.errors) {
       res.send({
-        errors: err.errors,
+        errors: err.errors
       });
     } else if (UnauthorizedError.isInstance(err)) {
       res
@@ -63,17 +63,17 @@ router.use((err: any, req: express.Request, res: express.Response) => {
             {
               code: 'UNAUTHORIZED',
               message: err.message,
-              details: null,
-            },
-          ],
+              details: null
+            }
+          ]
         });
     } else {
       res.send({
         errors: [{
           code: err.name,
           message: err.message,
-          details: (CustomError.isInstance(err)) ? err.details : undefined,
-        }],
+          details: (CustomError.isInstance(err)) ? err.details : undefined
+        }]
       });
     }
   }

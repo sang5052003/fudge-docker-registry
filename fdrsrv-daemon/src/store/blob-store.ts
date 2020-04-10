@@ -8,8 +8,8 @@ import * as uuid from 'uuid';
 
 import * as errors from '@src/constants/errors';
 import CustomError from '@src/http-errors/custom-error';
-import appEnv from '../app-env';
 import proxyService from '@src/services/proxy-service';
+import appEnv from '../app-env';
 
 export interface IGetBlobParams {
   registry?: string;
@@ -34,7 +34,7 @@ class WithDigestStream extends streams.Transform {
     }
 
     _transform(
-      chunk: any, encoding: string, callback: (error?: (Error | null), data?: any) => void,
+      chunk: any, encoding: string, callback: (error?: (Error | null), data?: any) => void
     ): void {
       this._hash.update(chunk);
       this.push(chunk, encoding);
@@ -131,25 +131,23 @@ export function getBlob(params: IGetBlobParams): Promise<IGetBlobResult> {
       stats = await util.promisify(fs.stat)(file);
     } catch (e) {
       if (e.code === 'ENOENT') {
-        if(appEnv.APP_PROXY_MODE) {
+        if (appEnv.APP_PROXY_MODE) {
           proxyService.getBlob({
             ...params,
             file
           })
-              .then(() => {
-                return util.promisify(fs.stat)(file);
-              })
-              .then((newStats) => {
-                resolve({
-                  file,
-                  stats: newStats,
-                  contentType: 'application/octet-stream',
-                });
-              })
-              .catch((err) => {
-                reject(err);
+            .then(() => util.promisify(fs.stat)(file))
+            .then((newStats) => {
+              resolve({
+                file,
+                stats: newStats,
+                contentType: 'application/octet-stream'
               });
-          return ;
+            })
+            .catch((err) => {
+              reject(err);
+            });
+          return;
         }
 
         reject(new CustomError(errors.DIGEST_INVALID));
@@ -162,13 +160,13 @@ export function getBlob(params: IGetBlobParams): Promise<IGetBlobResult> {
     resolve({
       file,
       stats,
-      contentType: 'application/octet-stream',
+      contentType: 'application/octet-stream'
     });
   });
 }
 
 export function preparePutBlob(
-  uploadId: string, name: string, digest: string,
+  uploadId: string, name: string, digest: string
 ): Promise<PutBlobContext> {
   try {
     const ctx = new PutBlobContext(uploadId, name, digest);

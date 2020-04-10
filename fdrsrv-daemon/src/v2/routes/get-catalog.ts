@@ -24,20 +24,20 @@ export default function (req: express.Request, res: express.Response, next: any)
       (err) => {
         if (err) reject(err);
         else resolve(repoList);
-      },
+      }
     );
   })).then((repoList) => {
     res
       .status(200)
       .send({
-        repositories: repoList,
+        repositories: repoList
       });
   }).catch((err) => {
     console.error(err);
     next(new CustomError({
       name: 'ServerError',
       message: 'DB Error',
-      status: 500,
+      status: 500
     }));
   });
 }
