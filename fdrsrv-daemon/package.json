@@ -1,5 +1,5 @@
 {
-  "name": "static-docker-registry-server",
+  "name": "fdrsrvd",
   "version": "1.0.0",
   "private": true,
   "scripts": {
