@@ -9,8 +9,13 @@ import * as uuid from 'uuid';
 import * as errors from '@src/constants/errors';
 import CustomError from '@src/http-errors/custom-error';
 import appEnv from '../app-env';
+import proxyService from '@src/services/proxy-service';
 
-const blobsDir = path.resolve(appEnv.APP_DATA_DIR, 'blobs');
+export interface IGetBlobParams {
+  registry?: string;
+  name: string;
+  digest: string;
+}
 
 export interface IGetBlobResult {
     file: string;
@@ -70,7 +75,7 @@ export class PutBlobContext {
 
       [this._digestAlgorithm, this._digestValue] = digest.split(':', 2);
 
-      this._path = path.resolve(blobsDir, this._digestAlgorithm, this._digestValue);
+      this._path = path.resolve(appEnv.getBlobsDir(), this._digestAlgorithm, this._digestValue);
       this._tempFile = `${this._path}.tmp.${uuid.v4().replace(/-/g, '').substring(0, 8)}`;
     }
 
@@ -117,15 +122,36 @@ export class PutBlobContext {
     }
 }
 
-export function getBlob(name: string, reference: string): Promise<IGetBlobResult> {
+export function getBlob(params: IGetBlobParams): Promise<IGetBlobResult> {
   return new Promise<IGetBlobResult>(async (resolve, reject) => {
-    const tokens = reference.split(':', 2);
-    const file = path.join(blobsDir, tokens[0], tokens[1]);
+    const tokens = params.digest.split(':', 2);
+    const file = path.join(appEnv.getBlobsDir(), tokens[0], tokens[1]);
     let stats: fs.Stats;
     try {
       stats = await util.promisify(fs.stat)(file);
     } catch (e) {
       if (e.code === 'ENOENT') {
+        if(appEnv.APP_PROXY_MODE) {
+          proxyService.getBlob({
+            ...params,
+            file
+          })
+              .then(() => {
+                return util.promisify(fs.stat)(file);
+              })
+              .then((newStats) => {
+                resolve({
+                  file,
+                  stats: newStats,
+                  contentType: 'application/octet-stream',
+                });
+              })
+              .catch((err) => {
+                reject(err);
+              });
+          return ;
+        }
+
         reject(new CustomError(errors.DIGEST_INVALID));
         return;
       }

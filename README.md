@@ -166,11 +166,66 @@ If you use clustering (HA), you must set to same value for all nodes.
 
 
 
-### \* `optional` **APP_LOGIN_MODULE**
-**Custom login module file path**
+### \* `optional` **APP_CONFIG_FILE**
+**config javascript file path**
 
 * type : path
+* default : ./fdrsrvd.config.js
+* snap default : $SNAP_COMMON/fdrsrvd.config.js (Typically /var/snap/fdrsrv/common/fdrsrvd.config.js)
 
+format (reference to [fdrsrv-daemon/types/frdsrvd-config.d.ts](fdrsrv-daemon/types/frdsrvd-config.d.ts)):
+```typescript
+type LoginFunction = (username: string, password: string) => Promise<boolean> | boolean;
+
+interface IExternalRegistryInfo {
+  endpoint?: string;
+  username?: string;
+  password?: string;
+}
+
+interface IEnvironments {
+  APP_SUB_DOMAIN: string;
+  APP_CONTEXT_PATH: string;
+  APP_JWT_SECRET: string;
+  APP_ALLOW_PUBLIC_PULL: string;
+  APP_NEED_LOGIN: string;
+  APP_DATA_DIR: string;
+  APP_CONFIG_FILE: string;
+  APP_PROXY_MODE: string;
+}
+
+interface IFdrsrvConfig {
+  overrideEnvironments?: IEnvironments;
+  login?: LoginFunction;
+  externalRegistries?: Record<string, IExternalRegistryInfo>;
+}
+```
+
+example:
+```javascript
+module.exports = {
+  overrideEnvironments: {
+    APP_PROXY_MODE: true
+  },
+  // With Promise
+  login: function (username, password) {
+    return new Promise((resolve, reject) => {
+      // resolve(true) / resolve(false)
+    });
+  },
+  // Without Promise
+  login: function (username, password) {
+    // return true / return false
+  },
+  externalRegistries: {
+    'docker.io': {
+      endpoint: 'https://registry-1.docker.io',
+      username: 'yourname',
+      password: '12345678'
+    }
+  }
+};
+```
 
 
 ### \* `optional` **APP_LOGIN_USERNAME** / **APP_LOGIN_PASSWORD**

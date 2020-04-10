@@ -12,13 +12,14 @@ const db = new sqlite3.Database(dbFile);
 
 db.serialize(() => {
   db.exec('PRAGMA journal_mode=WAL');
-  db.exec('CREATE TABLE IF NOT EXISTS `image` ('
+  db.exec('CREATE TABLE IF NOT EXISTS `manifest` ('
         + '    `name` TEXT,'
         + '    `tag` TEXT,'
+        + '    `schema_version` INTEGER,'
         + '    `uploaded_at` INTEGER,'
         + '    `media_type` TEXT, '
         + '    `manifest` TEXT, '
-        + '    PRIMARY KEY (`name`, `tag`)'
+        + '    PRIMARY KEY (`name`, `tag`, `schema_version`)'
         + ')', (err) => {
     if (err) {
       console.error(err);

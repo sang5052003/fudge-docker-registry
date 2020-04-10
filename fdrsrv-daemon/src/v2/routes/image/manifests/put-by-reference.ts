@@ -1,10 +1,9 @@
 import * as express from 'express';
-import * as crypto from 'crypto';
+import computeDigest from '@src/utils/digest';
 
 import appEnv from '@src/app-env';
 
 import * as store from '@src/store';
-
 
 import CustomError from '@src/http-errors/custom-error';
 import * as errors from '@src/constants/errors';
@@ -36,9 +35,8 @@ export default function (req: express.Request, res: express.Response, next: any)
   const digestFromRef: string[] | undefined = getDigestFromReference(reference);
   const digestAlgorithm = digestFromRef ? digestFromRef[0] : 'sha256';
 
-  const computedHash = crypto.createHash(digestAlgorithm).update(data).digest().toString('hex')
-    .toLowerCase();
-  const computedDigest = `${digestAlgorithm}:${computedHash}`;
+  const computedDigest = computeDigest(data, digestAlgorithm);
+  const computedHash = computedDigest.split(':')[1].toLowerCase();
 
   if (digestFromRef && (computedHash !== digestFromRef[1].toLowerCase())) {
     next(new CustomError(errors.DIGEST_INVALID));

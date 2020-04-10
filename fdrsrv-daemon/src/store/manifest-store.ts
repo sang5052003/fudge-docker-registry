@@ -1,48 +1,73 @@
-
 import * as errors from '@src/constants/errors';
 import CustomError from '@src/http-errors/custom-error';
 import { dbIsolateRun } from './db';
+import appEnv from '@src/app-env';
+import proxyService from '@src/services/proxy-service';
+import { getLocalImageName } from '@src/v2/routes/registry-fudge';
 
-export interface IGetManifestResult {
-    mediaType: string;
-    data: string;
+export interface IGetManifestParams {
+  registry?: string;
+  name: string;
+  reference: string;
 }
 
-export function getManifest(name: string, reference: string): Promise<IGetManifestResult> {
-  return dbIsolateRun<IGetManifestResult>((db) => new Promise((resolve, reject) => {
-    db.get(
-      'SELECT * FROM `image` WHERE `name`=? AND `tag`=?', [name, reference],
-      (err, row) => {
-        if (err) {
-          reject(err);
-          return;
+export interface IGetManifestResult {
+  mediaType: string;
+  data: string;
+}
+
+export function getManifest(params: IGetManifestParams): Promise<IGetManifestResult> {
+  const localImageName = getLocalImageName(params);
+  return new Promise<IGetManifestResult>((resolve, reject) => {
+    dbIsolateRun<any>((db) => new Promise<any>((dbRunResolve, dbRunReject) => {
+      db.get(
+          'SELECT * FROM `manifest` WHERE `name`=? AND `tag`=? ORDER BY `schema_version` DESC LIMIT 1', [localImageName, params.reference],
+          (err, row) => {
+            if (err) dbRunReject(err);
+            else dbRunResolve(row);
+          });
+    })).then(row => {
+      if (!row) {
+        if(appEnv.APP_PROXY_MODE) {
+          proxyService.getManifest(params)
+              .then((res) => {
+                resolve({
+                  mediaType: res.mediaType,
+                  data: res.manifest,
+                });
+              })
+              .catch((err) => {
+                reject(err);
+              });
+          return ;
         }
 
-        if (!row) {
-          reject(new CustomError(errors.TAG_INVALID));
-          return;
-        }
+        reject(new CustomError(errors.TAG_INVALID));
+        return;
+      }
 
-        resolve({
-          mediaType: row.media_type,
-          data: row.manifest,
-        });
-      },
-    );
-  }));
+      resolve({
+        mediaType: row.media_type,
+        data: row.manifest,
+      });
+    }).catch(err => {
+      reject(err);
+    });
+  });
 }
 
 export function putManifest(name: string, reference: string, data: string): Promise<void> {
   const uploadedAt = new Date();
   const manifest = JSON.parse(data);
+  const schemaVersion = manifest.schemaVersion;
   return dbIsolateRun((db) => new Promise((resolve, reject) => {
     db.run(
-      'INSERT INTO `image` (`name`, `tag`, `uploaded_at`, `media_type`, `manifest`) VALUES (?, ?, ?, ?, ?)',
-      [name, reference, uploadedAt.getTime(), manifest.mediaType, data],
-      (err) => {
-        if (err) reject(err);
-        else resolve();
-      },
+        'INSERT INTO `manifest` (`name`, `tag`, `schema_version`, `uploaded_at`, `media_type`, `manifest`) VALUES (?, ?, ?, ?, ?)',
+        [name, reference, schemaVersion, uploadedAt.getTime(), manifest.mediaType, data],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        },
     );
   }));
 }

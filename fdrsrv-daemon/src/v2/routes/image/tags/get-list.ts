@@ -11,7 +11,7 @@ export default function (req: express.Request, res: express.Response, next: any)
   store.dbIsolateRun<string[]>((db) => new Promise<string[]>((resolve, reject) => {
     const tagList: string[] = [];
     db.each(
-      'SELECT `name`,`tag`,`uploaded_at` FROM `image` WHERE `name`=?',
+      'SELECT `name`,`tag`,`uploaded_at` FROM `manifest` WHERE `name`=? GROUP BY (`name`,`tag`)',
       [name],
       (err, row) => {
         if (!err) {

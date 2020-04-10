@@ -2,18 +2,48 @@ import * as express from 'express';
 import * as crypto from 'crypto';
 
 import * as path from 'path';
+import * as fs from 'fs';
+
+import { IFdrsrvConfig } from '../types/fdrsrvd-config';
 
 // @ts-ignore
 // eslint-disable-next-line
 const requireFunc = typeof __webpack_require__ === 'function' ? __non_webpack_require__ : require;
 
-const { APP_SUB_DOMAIN } = process.env;
+const APP_CONFIG_FILE = (() => {
+  if (process.env.APP_CONFIG_FILE) {
+    return path.resolve(process.env.APP_CONFIG_FILE);
+  }
+  const defaultFile = path.resolve('./fdrsrvd.config.js');
+  if (fs.existsSync(defaultFile)) {
+    return defaultFile;
+  }
+  return undefined;
+})();
 
-const APP_CONTEXT_PATH = process.env.APP_CONTEXT_PATH || '';
+const config: IFdrsrvConfig = (() => {
+  if (APP_CONFIG_FILE) {
+    return requireFunc(APP_CONFIG_FILE);
+  }
+  return {};
+})();
+
+function getEnvironment(key: string): string | undefined {
+  if (config.overrideEnvironments) {
+    if (config.overrideEnvironments[key]) {
+      return config.overrideEnvironments[key];
+    }
+  }
+  return process.env[key];
+}
+
+const APP_SUB_DOMAIN = getEnvironment('APP_SUB_DOMAIN');
+const APP_CONTEXT_PATH = getEnvironment('APP_CONTEXT_PATH') || '';
 
 const APP_JWT_SECRET = (() => {
-  if (process.env.APP_JWT_SECRET) {
-    return process.env.APP_JWT_SECRET;
+  const envValue = getEnvironment('APP_JWT_SECRET');
+  if (envValue) {
+    return envValue;
   }
   return crypto.randomBytes(128).toString('base64')
     .replace(/[/=_-]/g, '')
@@ -21,44 +51,32 @@ const APP_JWT_SECRET = (() => {
 })();
 
 const APP_ALLOW_PUBLIC_PULL = (() => {
-  if (process.env.APP_ALLOW_PUBLIC_PULL) {
-    return /true|yes|1/i.test(process.env.APP_ALLOW_PUBLIC_PULL);
+  const envValue = getEnvironment('APP_ALLOW_PUBLIC_PULL');
+  if (envValue) {
+    return /true|yes|1/i.test(envValue);
   }
   return true;
 })();
 
 const APP_NEED_LOGIN = (() => {
-  if (process.env.APP_NEED_LOGIN) {
-    return !/false|no|0/i.test(process.env.APP_NEED_LOGIN);
+  const envValue = getEnvironment('APP_NEED_LOGIN');
+  if (envValue) {
+    return !/false|no|0/i.test(envValue);
   }
   return true;
 })();
 
-const APP_LOGIN_MODULE = (() => {
-  if (process.env.APP_LOGIN_MODULE) {
-    return path.resolve(APP_LOGIN_MODULE);
-  }
-  return undefined;
-})() as any;
-
-type LoginFunction = (username: string, password: string) => Promise<boolean> | boolean;
-
 function login(username: string, password: string): Promise<boolean> {
   if (APP_NEED_LOGIN) {
-    if (APP_LOGIN_MODULE) {
-      const loginFunction: LoginFunction = ((): LoginFunction => {
-        const mod = requireFunc(APP_LOGIN_MODULE);
-        if (typeof mod.default !== 'undefined') {
-          return mod.default as LoginFunction;
-        }
-        return mod as LoginFunction;
-      })();
-      return Promise.resolve<boolean>(loginFunction(username, password));
+    if (config.login) {
+      return Promise.resolve<boolean>(config.login(username, password));
     }
-    if (process.env.APP_LOGIN_USERNAME && process.env.APP_LOGIN_PASSWORD) {
+    const envUsername = getEnvironment('APP_LOGIN_USERNAME');
+    const envPassword = getEnvironment('APP_LOGIN_PASSWORD');
+    if (envUsername && envPassword) {
       return Promise.resolve(
-        (username === process.env.APP_LOGIN_USERNAME)
-          && (password === process.env.APP_LOGIN_PASSWORD),
+        (username === envUsername)
+          && (password === envPassword),
       );
     }
   }
@@ -66,8 +84,9 @@ function login(username: string, password: string): Promise<boolean> {
 }
 
 function getAppEndpoint(req: express.Request) {
-  if (process.env.APP_ENDPOINT) {
-    return process.env.APP_ENDPOINT;
+  const envValue = getEnvironment('APP_ENDPOINT');
+  if (envValue) {
+    return envValue;
   }
   const host = req.header('x-forwarded-host') || req.header('host');
   return `${req.protocol}://${host}${APP_CONTEXT_PATH}`;
@@ -82,11 +101,31 @@ function getHost(req: express.Request) {
 }
 
 const APP_DATA_DIR = (() => {
-  if (process.env.APP_DATA_DIR) {
-    return path.resolve(process.env.APP_DATA_DIR);
+  const envValue = getEnvironment('APP_DATA_DIR');
+  if (envValue) {
+    return path.resolve(envValue);
   }
   return path.resolve('./data/');
 })();
+
+const APP_PROXY_MODE = (() => {
+  const envValue = getEnvironment('APP_PROXY_MODE');
+  if (envValue) {
+    return !/false|no|0/i.test(envValue);
+  }
+  return true;
+})();
+
+const blobsDir = path.resolve(APP_DATA_DIR, 'blobs');
+
+function getBlobsDir() {
+  return blobsDir;
+}
+
+function getBlobFilePath(digest: string) {
+  const [ algo, hash ] = digest.split(':', 2);
+  return path.join(getBlobsDir(), algo, hash);
+}
 
 export default {
   APP_SUB_DOMAIN,
@@ -95,8 +134,13 @@ export default {
   APP_ALLOW_PUBLIC_PULL,
   APP_NEED_LOGIN,
   APP_DATA_DIR,
+  APP_CONFIG_FILE,
+  APP_PROXY_MODE,
+  config,
   login,
   getAppEndpoint,
   getSelfFullUrl,
   getHost,
+  getBlobsDir,
+  getBlobFilePath
 };

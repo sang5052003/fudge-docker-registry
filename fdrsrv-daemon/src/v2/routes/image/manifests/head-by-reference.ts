@@ -1,25 +1,23 @@
 import * as express from 'express';
-import * as crypto from 'crypto';
 import * as store from '@src/store';
 
-import { getImageName } from '../../registry-fudge';
+import computeDigest from '@src/utils/digest';
 
 export default function (req: express.Request, res: express.Response, next: any) {
-  const name = getImageName(req);
-  const { reference } = req.params;
+  const { registry } = req.query;
+  const { name, reference } = req.params;
 
-  console.log(name, ' : ', reference);
-
-  store.getManifest(name, reference)
+  store.getManifest({
+    registry, name, reference
+  })
     .then(({ mediaType, data }) => {
-      const hash = crypto.createHash('sha256');
-      hash.update(data);
-      const digest = hash.digest();
+      const digest = computeDigest(data);
+
       res
         .status(200)
         .contentType(mediaType)
         .set('Content-Length', data.length.toString())
-        .header('Docker-Content-Digest', `sha256:${digest.toString('hex')}`)
+        .header('Docker-Content-Digest', digest)
         .send();
     })
     .catch((e) => {

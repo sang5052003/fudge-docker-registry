@@ -9,7 +9,7 @@ export default function (req: express.Request, res: express.Response, next: any)
   store.dbIsolateRun<string[]>((db) => new Promise<string[]>((resolve, reject) => {
     const repoList: string[] = [];
     db.each(
-      'SELECT DISTINCT `name` FROM `image`',
+      'SELECT DISTINCT `name` FROM `manifest`',
       (err, row) => {
         if (!err) {
           if (registry) {

@@ -3,13 +3,13 @@ import * as express from 'express';
 
 import * as store from '@src/store';
 
-import { getImageName } from '../../registry-fudge';
-
 export default function (req: express.Request, res: express.Response, next: any) {
-  const name = getImageName(req);
-  const { digest } = req.params;
+  const { registry } = req.query;
+  const { name, digest } = req.params;
 
-  store.getBlob(name, digest)
+  store.getBlob({
+    registry, name, digest
+  })
     .then(({ file }) => {
       const stream = fs.createReadStream(file);
       stream
