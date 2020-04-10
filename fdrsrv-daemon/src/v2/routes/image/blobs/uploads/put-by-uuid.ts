@@ -15,8 +15,6 @@ export default function (req: express.Request, res: express.Response, next: any)
   const uploadId = req.params.uuid;
   const { digest } = req.query;
 
-  console.log('PUT DIGEST => ', digest);
-
   const authResult = checkAuth(req);
   if (authResult.error) {
     next(authResult.error);

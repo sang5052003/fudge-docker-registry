@@ -41,16 +41,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const router = express.Router();
 router.use((req: express.Request, res, next) => {
   res.setHeader('Docker-Distribution-Api-Version', 'registry/2.0');
-
-  // console.log('*REQUEST*', {
-  //     method: req.method,
-  //     url: req.url,
-  //     headers: req.headers,
-  //     // params: req.params,
-  //     // query: req.query,
-  //     user: (req as any).user,
-  // });
-
   next();
 });
 router.use('/auth', authRouter);
@@ -82,7 +72,7 @@ router.use((err: any, req: express.Request, res: express.Response) => {
         errors: [{
           code: err.name,
           message: err.message,
-          details: (err instanceof CustomError) ? err.details : undefined,
+          details: (CustomError.isInstance(err)) ? err.details : undefined,
         }],
       });
     }

@@ -90,14 +90,12 @@ export default (req: express.Request, res: express.Response) => {
 
   appEnv.login(idpw[0], idpw[1])
     .then((loginResult) => {
-      console.log('loginResult => ', loginResult);
       if (loginResult) {
         const token = issueToken({
           id: idpw[0],
           req,
           scope: [scope.join(':')],
         });
-        console.log(token);
         res
           .status(200)
           .send(token);
