@@ -286,11 +286,11 @@ export class DownloadingImageInfo {
     this.key = concatName(params);
   }
 
-  public addManifestDownload(reference: string, callbacks: FutureCallback<IGetManifestResult>) {
+  public addManifestDownload(reference: string, callbacks: FutureCallback<IGetManifestResult>): void {
     if (this.tagContext[reference]) {
       const tagContext = this.tagContext[reference];
       if (tagContext.manifestFetched) {
-        return Promise.resolve({
+        callbacks.resolve({
           mediaType: tagContext.manifestMediaType,
           manifest: tagContext.manifestString
         });
