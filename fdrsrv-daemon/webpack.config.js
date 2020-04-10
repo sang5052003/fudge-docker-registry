@@ -12,10 +12,12 @@ module.exports = {
   },
   devtool: 'source-map',
   resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
+    extensions: ['.ts', '.tsx', '.js', '.json'],
     alias: {
       'sqlite3': path.resolve(__dirname, './libraries/sqlite3.js'),
-      '@src': path.resolve(__dirname, './src/')
+      '@src': path.resolve(__dirname, './src/'),
+      'jwk-to-pem': path.resolve(__dirname, './node_modules/jwk-to-pem'),
+      'restify-clients': path.resolve(__dirname, './node_modules/restify-clients')
     }
   },
   module: {
