@@ -166,6 +166,20 @@ If you use clustering (HA), you must set to same value for all nodes.
 
 
 
+### \* `optional` **APP_PROXY_MODE**
+**Enable/Disable proxy mode**
+
+* type : false/no/0 is disable, otherwise is enable
+* default : true
+
+When an image pull is requested as a sub-domain,
+if the corresponding image does not exist,
+the image is retrieved from the original registry.
+
+You can save images more easily.
+
+
+
 ### \* `optional` **APP_CONFIG_FILE**
 **config javascript file path**
 
