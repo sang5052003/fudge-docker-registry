@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -eux
+
+mkdir -p ${SNAP_DATA}/args
+
+if [ ! -f ${SNAP_DATA}/args/daemon-env ]; then
+  echo "Making sure we have daemon environment file"
+  cp ${SNAP}/default-args/daemon-env ${SNAP_DATA}/args/daemon-env
+
+  RANDOM_APP_JWT_SECRET=$(dd if=/dev/urandom bs=1 count=15 2>/dev/null | base64)
+  "$SNAP/bin/sed" -i 's@\export APP_JWT_SECRET=$@export APP_JWT_SECRET='$RANDOM_APP_JWT_SECRET'@g' ${SNAP_DATA}/args/daemon-env
+fi
+
+if [ ! -f ${SNAP_COMMON}/fdrsrvd.config.js ]; then
+  cat <<EOF > ${SNAP_COMMON}/fdrsrvd.config.js
+/** @type { IFdrsrvConfig } */
+module.exports = {
+  overrideEnvironments: {},
+  externalRegistries: {},
+  // login: (username, password) => {}
+};
+EOF
+fi

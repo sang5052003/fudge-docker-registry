@@ -6,6 +6,6 @@ export APP_DATA_DIR=${SNAP_COMMON}/data
 export APP_JWT_SECRET=
 export APP_ALLOW_PUBLIC_PULL=true
 export APP_NEED_LOGIN=true
-# export APP_LOGIN_MODULE=
+export APP_CONFIG_FILE=${SNAP_COMMON}/fdrsrvd.config.js
 export APP_LOGIN_USERNAME=admin
 export APP_LOGIN_PASSWORD=

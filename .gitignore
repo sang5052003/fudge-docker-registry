@@ -119,7 +119,6 @@ dist
 # snapcraft
 parts
 prime
-snap
 stage
 
 # data
