@@ -45,7 +45,6 @@ parts:
     override-build: |
       export APP_NAME=$SNAPCRAFT_PROJECT_NAME
       export NVM_DIR=${SNAPCRAFT_STAGE}/nvm
-      export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node
       mkdir -p ${NVM_DIR}
       mkdir -p ${SNAPCRAFT_PART_INSTALL}/app
       curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
