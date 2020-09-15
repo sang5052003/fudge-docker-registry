@@ -116,6 +116,8 @@ const APP_PROXY_MODE = (() => {
   return true;
 })();
 
+const APP_DRC_LOG_LEVEL = getEnvironment('APP_DRC_LOG_LEVEL') || 'warn';
+
 const blobsDir = path.resolve(APP_DATA_DIR, 'blobs');
 
 function getBlobsDir() {
@@ -136,6 +138,7 @@ export default {
   APP_DATA_DIR,
   APP_CONFIG_FILE,
   APP_PROXY_MODE,
+  APP_DRC_LOG_LEVEL,
   config,
   login,
   getAppEndpoint,

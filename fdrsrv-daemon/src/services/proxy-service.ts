@@ -1,3 +1,4 @@
+import * as bunyan from 'bunyan';
 import * as drc from 'docker-registry-client';
 // eslint-disable-next-line
 import * as restify from 'restify';
@@ -94,6 +95,11 @@ function promisifyMa(func: (...params: any[]) => void): (...args: any[]) => Prom
     });
   });
 }
+
+const drcLog = bunyan.createLogger({
+  name: 'drc',
+  level: appEnv.APP_DRC_LOG_LEVEL as any
+});
 
 class ImageTagContext {
   readonly parent: DownloadingImageInfo;
@@ -467,7 +473,9 @@ export class ProxyService {
         const { externalRegistries } = appEnv.config;
         const registryInfo = externalRegistries && externalRegistries[imageContext.registry];
         if (registryInfo) {
-          const opts: drc.CreateClientV2Options = {};
+          const opts: drc.CreateClientV2Options = {
+            log: drcLog
+          };
           if (registryInfo.endpoint) {
             opts.name = `${registryInfo.endpoint}/${imageContext.imageName}`;
           }
@@ -476,6 +484,7 @@ export class ProxyService {
           return drc.createClientV2(opts);
         }
         return drc.createClientV2({
+          log: drcLog,
           name: concatedName
         });
       })();
