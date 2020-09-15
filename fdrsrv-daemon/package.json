@@ -3,7 +3,7 @@
   "version": "1.0.2",
   "private": true,
   "scripts": {
-    "start": "ts-node src/entry.ts",
+    "start": "ts-node -r tsconfig-paths/register src/entry.ts",
     "lint-check": "eslint ./**/*.ts",
     "build-sqlite3": "node scripts/build-sqlite3.js",
     "build": "npm run lint-check && webpack && npm run build-sqlite3"
