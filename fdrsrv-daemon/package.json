@@ -9,11 +9,11 @@
     "build": "npm run lint-check && webpack && npm run build-sqlite3"
   },
   "dependencies": {
+    "@jc-lab/docker-registry-client": "^3.3.0-jclab1",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.14",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "docker-registry-client": "^3.3.0",
     "express": "~4.16.1",
     "express-jwt": "^5.3.1",
     "express-validator": "^6.4.0",
@@ -21,7 +21,7 @@
     "jwk-to-pem": "^2.0.3",
     "mkdirp": "^1.0.3",
     "morgan": "~1.9.1",
-    "restify-clients": "^2.6.9",
+    "restify-clients": "^4.0.0",
     "sqlite3": "^4.1.1",
     "uuid": "^7.0.2"
   },

@@ -1,5 +1,5 @@
 import * as bunyan from 'bunyan';
-import * as drc from 'docker-registry-client';
+import * as drc from '@jc-lab/docker-registry-client';
 // eslint-disable-next-line
 import * as restify from 'restify';
 
