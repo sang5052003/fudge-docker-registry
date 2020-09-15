@@ -476,7 +476,7 @@ export class ProxyService {
           return drc.createClientV2(opts);
         }
         return drc.createClientV2({
-          name: imageContext.imageName
+          name: concatedName
         });
       })();
       imageContext.repoClient = repoClient;
